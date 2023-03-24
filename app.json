@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "Taxi Driver Recording",
+    "slug": "Taxi-Driver-Recording",
+    "description": "React Native - Soft UI Kit - Free",
+    "primaryColor": "#ffff",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/applogo.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#fff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Taxi Recording App to access your camera."
+        }
+      ]
+    ],
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/applogo.png",
+        "backgroundColor": "#fff"
+      },
+      "package": "com.taxi"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2528fdb7-dfed-49ca-8043-c8b96ebc1990"
+      }
+    }
+  }
+}
