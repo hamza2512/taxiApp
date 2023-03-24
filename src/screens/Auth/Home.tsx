@@ -404,7 +404,7 @@ const Home = () => {
     setIsActive(!isActive);
     setVisible(!visible);
     setCount((count) => count + 1);
-    // setRecording(!recording);
+
     dispatch(setRecordingStart(!recording));
     // endlocation()
   };
