@@ -16,6 +16,7 @@ import React, {
   useEffect,
   useState,
   useRef,
+  useLayoutEffect,
 } from 'react';
 import {useTheme} from '../../hooks';
 import {useNavigation} from '@react-navigation/native';
@@ -49,13 +50,12 @@ const Home = () => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [rideId, setRideId] = useState();
+  const [deviceId, setDeviceId] = useState();
   const navigation = useNavigation();
   const [remainingSecs, setRemainingSecs] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [count, setCount] = useState(0);
-  // const [recording, setRecording] = useState(false);
-  // const [vedioIndex, setVedioIndex] = useState(0);
-  // const [vedioBase64, setVedioBase64] = useState<any>([]);
+
   const isRecordingAllowed = useSelector(
     (state: RootState) => state.data.driveWithVedio,
   );
@@ -82,25 +82,37 @@ const Home = () => {
     useCreateRideMutation();
   const [EndRide, {data: endride, error: RideEnddata}] = useEndRideMutation();
   const [SendRideVideos] = useSendRideVideosMutation();
-  const [GetActiveRide] = useGetActiveRideMutation();
+  const [GetActiveRide, ...values] = useGetActiveRideMutation();
+  const [rideEndData, setRideEndData] = useState();
   const dispatch = useDispatch();
+
   useEffect(() => {
-    if (!RideEnddata) return;
+    if (!RideEnddata && !rideEndData) return;
+
+    // console.log(
+    //   '=============Inside End Toast UseEffect=======================',
+    // );
     EndToastFunction();
-  }, [RideEnddata]);
+  }, [RideEnddata, rideEndData]);
   useEffect(() => {
-    if (!startedRide) return;
+    if (!startedRide && !rideId) return;
 
+    // console.log(
+    //   '=============Inside Start Toast UseEffect=======================',
+    // );
     startToastFunction();
-  }, [startedRide]);
+  }, [startedRide, rideId]);
 
-  useEffect(() => {
-    if (!startedRide?.data) return;
-    const rideid = startedRide?.data.split(':');
-    setRideId(rideid[1].trim());
-  }, [startedRide]);
+  // useEffect(() => {
+  //   if (!startedRide?.data && !rideId) return;
+  //   // const rideid = startedRide?.data.split(':');
+  //   console.log('=============Ride Id=======================');
+  //   // console.log(startedRide?.data);
+  //   console.log(rideId);
+  //   console.log('====================================');
+  //   // setRideId(rideid[1].trim());
+  // }, [startedRide, rideId]);
 
-  // console.log("Reduxvalue",modal);
   useEffect(() => {
     if (count === 2) {
       setCount(0);
@@ -110,7 +122,7 @@ const Home = () => {
 
   useEffect(() => {
     let interval = null;
-    // console.log("isActive",isActive);
+    // console.log('Inside UseEffect of isActive', isActive);
     if (isActive) {
       interval = setInterval(() => {
         setRemainingSecs((remainingSecs) => remainingSecs + 1);
@@ -121,11 +133,12 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [isActive]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     (async () => {
       let {status} = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         setErrorMsg('Permission to access location was denied');
+        // console.error('Permission to access location was denied');
         return;
       }
 
@@ -141,6 +154,8 @@ const Home = () => {
     })();
   }, []);
 
+  // var deviceId: String;
+  var taskId: String;
   useEffect(() => {
     if (!visible) {
       setRemainingSecs(0);
@@ -152,27 +167,40 @@ const Home = () => {
     console.log('location logging');
     console.log(location);
 
-    const res = createRide({
+    createRide({
       driverID: userData?.driverID,
       latitude: location?.coords?.latitude,
       longitude: location?.coords?.longitude,
+    }).then((item) => {
+      reference.current = true;
+      setRideId(item?.data?.rideId);
+      setDeviceId(item?.data?.deviceId);
+      // deviceId = item?.data?.deviceId;
+      taskId = item?.data?.rideId;
+      console.log('Before Setting Ride Id', deviceId);
+      console.log('Before Setting Device id-----', taskId);
+      dispatch(setRecordingStart(true));
     });
   }, [location]);
 
   useEffect(() => {
     if (!visible) return;
-    else {
-      startlocation();
-    }
+
+    startlocation();
   }, [visible]);
 
   const endlocation = () => {
+    console.log('Inside of EndLocation function ');
     if (rideId) {
+      console.log('Inside of EndLocation function if condition');
       const data = {
         location: location?.coords,
         rideId: rideId,
       };
-      EndRide({data});
+      EndRide({data}).then((res) => {
+        setRideEndData(res);
+        console.log('End Ride Response', res);
+      });
     }
   };
 
@@ -180,10 +208,10 @@ const Home = () => {
     ToastAndroid.show('Ride Started', ToastAndroid.SHORT);
   }, []);
   const EndToastFunction = useCallback(() => {
-    if (RideEnddata) {
+    if (RideEnddata || rideEndData) {
       ToastAndroid.show('Ride Ended', ToastAndroid.SHORT);
     }
-  }, [RideEnddata]);
+  }, [RideEnddata, rideEndData]);
   if (modal) {
     Alert.alert('Update', 'This feature will be availble soon', [
       {text: 'OK', onPress: () => dispatch(setmodal(false))},
@@ -196,11 +224,9 @@ const Home = () => {
   const cameraRef = useRef(null);
   const recording = useSelector((state: RootState) => state.data.recording);
   const reference = useRef(true);
-  // reference.current = recording;
 
   const frontCamera = Camera.Constants.Type.front;
-  let deviceId: String;
-  let taskId: String;
+
   const startRecording = async () => {
     console.log('------Inside of Start Recording---');
     try {
@@ -217,7 +243,7 @@ const Home = () => {
           maxDuration: 15,
           mute: false,
         });
-        console.log('URI Vedio', video.uri);
+        // console.log('URI Vedio', video.uri);
         saveVideo(video.uri);
       } else {
         console.log('Camera permission not granted');
@@ -227,37 +253,11 @@ const Home = () => {
       console.log(error);
     }
   };
-  // const sendingVedios = async () => {
-  //   try {
-  //     if (body.length == 0) {
-  //       return;
-  //     }
-  //     console.log('=================Inside Api calling===================');
 
-  //     const res = await SendRideVideos(body);
-  //     console.log('=======Send Vedio response=============================');
-  //     console.log(res);
-  //     if (res?.data) {
-  //       body = [];
-  //       console.log(
-  //         '=================Settings vedios Empty===================',
-  //       );
-  //       if (recording === false) {
-  //         temp = 0;
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.log('=============Send Vedio Error=======================');
-  //     console.log(error);
-  //     console.log('====================================');
-  //   }
-  // };
   let temp = 0;
   let body: any[] = [];
 
   const saveVideo = async (uri) => {
-    // console.log('================Inside of SAve Vedio====================');
-
     temp = temp + 1;
 
     const fsRead = await FileSystem.readAsStringAsync(uri, {
@@ -265,34 +265,38 @@ const Home = () => {
     });
 
     const newPath = {
-      fileName: `${temp}_${deviceId}_${taskId}`,
+      fileName: `${temp}_${deviceId}_${rideId}.mp4`,
       videoFileInBase64: fsRead,
     };
 
     body.push(newPath);
-    // console.log('Recording Status', reference.current);
-    // console.log('Recording Status', recording);
-    if (body.length >= 2 || reference.current == false) {
-      // await sendingVedios();
+    // console.log('============Reference ========================');
+    // console.log(reference.current);
+    // console.log('====================================');
+    if (body.length >= 5 || reference.current == false) {
       try {
-        // console.log('=================Inside Api calling===================');
+        // console.log(
+        //   '=================Inside Api calling of Sending Videos===================',
+        //   body.length,
+        // );
 
         const res = await SendRideVideos(body);
         // console.log('=======Send Vedio response=============================');
-        console.log(res);
+        // console.log(res);
         if (res?.data) {
           body = [];
-          // console.log(
-          //   '=================Settings vedios Empty===================',
-          // );
+
           if (recording === false) {
+            // console.log(
+            //   '=================Settings vedios Empty===================',
+            // );
             temp = 0;
           }
         }
       } catch (error) {
-        console.log('=============Send Vedio Error=======================');
-        console.log(error);
-        console.log('====================================');
+        // console.log('=============Send Vedio Error=======================');
+        // console.log(error);
+        // console.log('====================================');
       }
     }
 
@@ -305,92 +309,23 @@ const Home = () => {
     // console.log(`Video saved to ${path}`);
   };
 
-  // BackgroundFetch.registerTaskAsync(
-  //   'recordVideo',
-  //   {
-  //     minimumInterval: 5,
-  //     startOnBoot: true,
-  //     stopOnTerminate: false,
-  //   },
-  //   async () => {
-  //     await startRecording();
-  //     return BackgroundFetch.Result.NewData;
-  //   },
-  // );
-
-  // const VIDEO_INTERVAL = 5000; // 5 seconds
-  // const VIDEO_DURATION = 15000; // 15 seconds
-  // const CAMERA_TYPE = Camera.Constants.Type?.front;
-  // const CAMERA_QUALITY = Camera.Constants.VideoQuality['480p'];
-
-  // async function startRecording() {
-  //   console.log('Inside Start Recording');
-  //   const camera = await Camera.getAvailableCameraTypesAsync();
-  //   if (camera.includes(CAMERA_TYPE)) {
-  //     const cameraPermission = await Camera.getCameraPermissionsAsync();
-  //     if (cameraPermission.granted) {
-  //       const cameraInstance = await Camera.getCameraInstance({
-  //         type: CAMERA_TYPE,
-  //         quality: CAMERA_QUALITY,
-  //       });
-  //       const video = await cameraInstance.recordAsync({
-  //         maxDuration: VIDEO_DURATION,
-  //       });
-  //       console.log('============Video========================');
-  //       console.log(video);
-  //       console.log('====================================');
-  //       const fileUri = video.uri;
-  //       await FileSystem.moveAsync({
-  //         from: fileUri,
-  //         to: `${FileSystem.cacheDirectory}/video-${Date.now()}.mp4`,
-  //       });
-  //     }
-  //   }
-  // }
-
-  // TaskManager.defineTask('recordVideo', async () => {
-  //   console.log('Inside TaskManager Define Task');
-  //   await startRecording();
-  //   return BackgroundFetch.BackgroundFetchResult.NewData;
-  // });
-
-  // BackgroundFetch.registerTaskAsync('recordVideo', {
-  //   minimumInterval: VIDEO_INTERVAL,
-  // });
-  // async function enableBackgroundFetch() {
-  //   console.log('Inside TaskManager Enable Fetch');
-  //   await BackgroundFetch.setMinimumIntervalAsync(VIDEO_INTERVAL);
-  // }
-  // enableBackgroundFetch();
-
   const recordingHalt = () => {
-    // console.log('Inside Halt before');
     reference.current = false;
+    // console.log('Inside Halt before reference', reference.current);
+
     cameraRef.current.stopRecording();
 
     // console.log('Inside After before', recording);
-  };
-
-  const getActiveRidesForDevice = async () => {
-    const driverID = userData?.driverID;
-    const {data} = await GetActiveRide(driverID);
-    if (data?.istaskActive) {
-      reference.current = true;
-      startRecording();
-      deviceId = data?.deviceId;
-      taskId = data?.taskId;
-    }
   };
 
   useEffect(() => {
     let interval: any;
     if (isRecordingAllowed) {
       if (recording) {
-        getActiveRidesForDevice();
-        // startRecording();
+        // console.log('Inside When Recording true');
+        startRecording();
         interval = setInterval(() => {
-          // startRecording();
-          getActiveRidesForDevice();
+          startRecording();
         }, 23000);
       } else {
         recordingHalt();
@@ -404,8 +339,9 @@ const Home = () => {
     setIsActive(!isActive);
     setVisible(!visible);
     setCount((count) => count + 1);
-
-    dispatch(setRecordingStart(!recording));
+    if (!recording == false) {
+      dispatch(setRecordingStart(!recording));
+    }
     // endlocation()
   };
   return (
@@ -419,7 +355,6 @@ const Home = () => {
             ref={cameraRef}
             style={{height: 1, width: 1}}
             type={frontCamera}
-            // onRecordingStatusUpdate={handleRecordingStatusUpdate}
           />
         )}
         <Block
@@ -468,7 +403,7 @@ const Home = () => {
               height={80}
               style={{zIndex: 1, alignSelf: 'center', justifyContent: 'center'}}
               color={colors.white}>
-              {startedRide ? (
+              {startedRide || rideId ? (
                 <Text color={colors.red} style={{alignSelf: 'center'}} h1>
                   {hour} : {mins} : {secs}
                 </Text>
@@ -482,3 +417,6 @@ const Home = () => {
 };
 
 export default Home;
+// "eas": {
+//   "projectId": "2528fdb7-dfed-49ca-8043-c8b96ebc1990"
+// }

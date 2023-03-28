@@ -48,17 +48,24 @@ export const TaxiApi = createApi({
         return {
           url: `GetActiveRidesForDevice?code=${code}&driverId=${driverID}`,
           method: 'GET',
+          responseHandler: (response) => response.text(),
         };
       },
     }),
     EndRide: builder.mutation({
       query: ({data}) => {
-        const {location, rideId} = data;
-        console.log('jami', location.latitude, rideId, location.longitude);
-        return {
-          url: `/EndRide?code=${code}&geoLocation={lat:${location.latitude},long:${location.longitude}}&rideId=${rideId}`,
-          method: 'GET',
-        };
+        try {
+          const {location, rideId} = data;
+          console.log('jami', location.latitude, rideId, location.longitude);
+          return {
+            url: `/EndRide?code=${code}&geoLocation={lat:${location.latitude},long:${location.longitude}}&rideId=${rideId}`,
+            method: 'GET',
+            responseHandler: (response) => response.text(),
+          };
+        } catch (error) {
+          console.log('Inside Error of EndRide', error);
+          return {data: error};
+        }
       },
     }),
     GetHistoryList: builder.mutation({
@@ -85,6 +92,7 @@ export const TaxiApi = createApi({
             method: 'GET',
           };
         } catch (error) {
+          console.log('error when fetching', error);
           return {data: error};
         }
       },

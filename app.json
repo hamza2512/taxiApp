@@ -23,7 +23,9 @@
         }
       ]
     ],
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -32,14 +34,18 @@
         "foregroundImage": "./assets/applogo.png",
         "backgroundColor": "#fff"
       },
-      "package": "com.taxi"
+      "package": "com.taxi",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "2528fdb7-dfed-49ca-8043-c8b96ebc1990"
+        "projectId": "9c9cf3e0-0b48-4205-807f-a905ae17e8d1"
       }
     }
   }
