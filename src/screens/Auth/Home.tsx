@@ -89,17 +89,11 @@ const Home = () => {
   useEffect(() => {
     if (!RideEnddata && !rideEndData) return;
 
-    // console.log(
-    //   '=============Inside End Toast UseEffect=======================',
-    // );
     EndToastFunction();
   }, [RideEnddata, rideEndData]);
   useEffect(() => {
     if (!startedRide && !rideId) return;
 
-    // console.log(
-    //   '=============Inside Start Toast UseEffect=======================',
-    // );
     startToastFunction();
   }, [startedRide, rideId]);
 
@@ -122,7 +116,7 @@ const Home = () => {
 
   useEffect(() => {
     let interval = null;
-    // console.log('Inside UseEffect of isActive', isActive);
+
     if (isActive) {
       interval = setInterval(() => {
         setRemainingSecs((remainingSecs) => remainingSecs + 1);
@@ -133,29 +127,29 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [isActive]);
 
+  const driverLocation = async () => {
+    // console.log('=================INSIDE location===================');
+
+    let {status} = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      // setErrorMsg('Permission to access location was denied');
+      // console.error('Permission to access location was denied');
+      Alert.alert('Update', 'Permission to Access location is Denied', [
+        {text: 'OK'},
+      ]);
+      return false;
+    }
+
+    // console.log('=================INSIDE location===================', status);
+
+    let loc = await Location.getCurrentPositionAsync({});
+    // console.log('location', loc);
+    setLocation(loc);
+  };
   useLayoutEffect(() => {
-    (async () => {
-      let {status} = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        // console.error('Permission to access location was denied');
-        return;
-      }
+    driverLocation();
+  }, [isFocused, startedRide]);
 
-      console.log('log test');
-      console.log('log test 2');
-
-      console.log('location: ', await Location.getCurrentPositionAsync({}));
-      let location = await Location.getCurrentPositionAsync({});
-      console.log('log test 3');
-
-      console.log('location: ', location);
-      setLocation(location);
-    })();
-  }, []);
-
-  // var deviceId: String;
-  var taskId: String;
   useEffect(() => {
     if (!visible) {
       setRemainingSecs(0);
@@ -164,8 +158,8 @@ const Home = () => {
   }, [visible]);
 
   const startlocation = useCallback(() => {
-    console.log('location logging');
-    console.log(location);
+    // console.log('location logging');
+    // console.log(location);
 
     createRide({
       driverID: userData?.driverID,
@@ -177,29 +171,31 @@ const Home = () => {
       setDeviceId(item?.data?.deviceId);
       // deviceId = item?.data?.deviceId;
       taskId = item?.data?.rideId;
-      console.log('Before Setting Ride Id', deviceId);
-      console.log('Before Setting Device id-----', taskId);
+
       dispatch(setRecordingStart(true));
     });
   }, [location]);
 
   useEffect(() => {
     if (!visible) return;
-
-    startlocation();
+    if (!location) {
+      driverLocation().then(() => startlocation());
+    } else {
+      startlocation();
+    }
   }, [visible]);
 
   const endlocation = () => {
-    console.log('Inside of EndLocation function ');
+    // console.log('Inside of EndLocation function ');
     if (rideId) {
-      console.log('Inside of EndLocation function if condition');
+      // console.log('Inside of EndLocation function if condition');
       const data = {
         location: location?.coords,
         rideId: rideId,
       };
       EndRide({data}).then((res) => {
         setRideEndData(res);
-        console.log('End Ride Response', res);
+        // console.log('End Ride Response', res);
       });
     }
   };
@@ -228,7 +224,7 @@ const Home = () => {
   const frontCamera = Camera.Constants.Type.front;
 
   const startRecording = async () => {
-    console.log('------Inside of Start Recording---');
+    // console.log('------Inside of Start Recording---');
     try {
       const {status} = await Camera.requestCameraPermissionsAsync();
       const audioPersmission = (await Audio.requestPermissionsAsync()).status;
@@ -240,13 +236,14 @@ const Home = () => {
 
         const video = await cameraRef.current.recordAsync({
           quality: Camera.Constants.VideoQuality['480p'],
-          maxDuration: 15,
+          maxDuration: 30,
           mute: false,
         });
         // console.log('URI Vedio', video.uri);
         saveVideo(video.uri);
       } else {
-        console.log('Camera permission not granted');
+        // console.log('Camera permission not granted');
+        Alert.alert('Error', 'Camera permission not granted', [{text: 'OK'}]);
       }
     } catch (error) {
       console.log('Inside catch of startRecording');
@@ -258,11 +255,13 @@ const Home = () => {
   let body: any[] = [];
 
   const saveVideo = async (uri) => {
+    // console.log('Inside Save Vedio');
     temp = temp + 1;
 
     const fsRead = await FileSystem.readAsStringAsync(uri, {
       encoding: 'base64',
     });
+    await FileSystem.deleteAsync(uri, {idempotent: true});
 
     const newPath = {
       fileName: `${temp}_${deviceId}_${rideId}.mp4`,
@@ -273,7 +272,7 @@ const Home = () => {
     // console.log('============Reference ========================');
     // console.log(reference.current);
     // console.log('====================================');
-    if (body.length >= 5 || reference.current == false) {
+    if (body.length >= 2 || reference.current == false) {
       try {
         // console.log(
         //   '=================Inside Api calling of Sending Videos===================',
@@ -295,18 +294,10 @@ const Home = () => {
         }
       } catch (error) {
         // console.log('=============Send Vedio Error=======================');
-        // console.log(error);
+        console.log(error);
         // console.log('====================================');
       }
     }
-
-    // const filename = uri.split('/').pop();
-    // const path = `${FileSystem.cacheDirectory}${temp}${filename}`;
-    // await FileSystem.copyAsync({
-    //   from: uri,
-    //   to: path,
-    // });
-    // console.log(`Video saved to ${path}`);
   };
 
   const recordingHalt = () => {
@@ -326,7 +317,7 @@ const Home = () => {
         startRecording();
         interval = setInterval(() => {
           startRecording();
-        }, 23000);
+        }, 32000);
       } else {
         recordingHalt();
       }

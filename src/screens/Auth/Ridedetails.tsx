@@ -16,6 +16,7 @@ const Ridedetails = ({route}) => {
   const [startedlong, setStartedlong] = useState();
   const [endedlat, setEndedlat] = useState();
   const [endedlong, setEndedlong] = useState();
+  const [regionState, setRegionState] = useState();
   const {rideId} = route.params;
   const [startGeoLocation, setstartGeolocation] = useState({});
   const [rideDetails, {data, error}] = useGetRideDetailsMutation();
@@ -113,6 +114,11 @@ const Ridedetails = ({route}) => {
               // longitude: -122.4324,
               latitudeDelta: 0.0922,
               longitudeDelta: 0.0421,
+            }}
+            region={regionState}
+            onRegionChange={(res) => {
+              // console.log('region coordinates', res);
+              setRegionState(res);
             }}>
             <Marker
               coordinate={{latitude: startedlat, longitude: startedlong}}
