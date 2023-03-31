@@ -20,10 +20,10 @@ const Ridedetails = ({route}) => {
   const {rideId} = route.params;
   const [startGeoLocation, setstartGeolocation] = useState({});
   const [rideDetails, {data, error}] = useGetRideDetailsMutation();
-  console.log('rideId', rideId);
+  // console.log('rideId', rideId);
   const lat = data?.endGeoLocation;
-  console.log('Details', lat);
-  console.log('error', error);
+  // console.log('Details', lat);
+  // console.log('error', error);
   // var start = JSON.stringify(data?.startGeoLocation)
   // var ans = JSON.parse(start?.replace("lat",'"lat"').replace("long",'"long"'))
   // console.log(JSON.parse(data));
@@ -34,14 +34,14 @@ const Ridedetails = ({route}) => {
       location?.replace('lat', '"lat"').replace('long', '"long"'),
     );
   };
-  console.log('Type of Data', typeof data);
+  // console.log('Type of Data', typeof data);
   let res = {};
   for (const key in data) {
     res[key] = data[key];
   }
-  console.log('============Res========================');
-  console.log(res);
-  console.log('====================================');
+  // console.log('============Res========================');
+  // console.log(res);
+  // console.log('====================================');
   var startLat = +data?.startGeoLocation
     ?.replace(/\"/g, '')
     ?.replace(/{/g, '')
@@ -67,10 +67,10 @@ const Ridedetails = ({route}) => {
     ?.replace(/,/g, ':')
     ?.split(':')[3];
 
-  console.log(startLat, ' ', startLong);
-  console.log(typeof startLat, ' ', typeof startLong);
-  console.log(endLat, ' ', endLong);
-  console.log(typeof endLat, ' ', typeof endLong);
+  // console.log(startLat, ' ', startLong);
+  // console.log(typeof startLat, ' ', typeof startLong);
+  // console.log(endLat, ' ', endLong);
+  // console.log(typeof endLat, ' ', typeof endLong);
   useEffect(() => {
     if (!startLong || !startLat || !endLat || !endLong) return;
     setStartedlong(startLong);
@@ -116,7 +116,7 @@ const Ridedetails = ({route}) => {
               longitudeDelta: 0.0421,
             }}
             region={regionState}
-            onRegionChange={(res) => {
+            onRegionChangeComplete={(res) => {
               // console.log('region coordinates', res);
               setRegionState(res);
             }}>

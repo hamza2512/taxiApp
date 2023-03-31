@@ -392,10 +392,20 @@ const Home = () => {
               bottom={-65}
               width={'70%'}
               height={80}
-              style={{zIndex: 1, alignSelf: 'center', justifyContent: 'center'}}
+              right={'25%'}
+              style={{
+                zIndex: 1,
+                alignSelf: 'center',
+                justifyContent: 'center',
+              }}
               color={colors.white}>
               {startedRide || rideId ? (
-                <Text color={colors.red} style={{alignSelf: 'center'}} h1>
+                <Text
+                  color={colors.red}
+                  style={{
+                    alignSelf: 'center',
+                  }}
+                  h1>
                   {hour} : {mins} : {secs}
                 </Text>
               ) : null}
