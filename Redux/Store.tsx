@@ -1,14 +1,16 @@
 import {configureStore} from '@reduxjs/toolkit';
 import counterReducer from './CounterSlice';
-import { TaxiApi } from './TaxiApi';
+import {TaxiApi} from './TaxiApi';
+import loadingSlice from './loadingSlice';
 // import {TaxiApi} from './TaxiApi';
 
-export const store = configureStore({
+export const store: any = configureStore({
   reducer: {
     [TaxiApi.reducerPath]: TaxiApi.reducer,
     data: counterReducer,
+    loading: loadingSlice,
   },
-  middleware: getDefaultMiddleware =>
+  middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(TaxiApi.middleware),
 });
 

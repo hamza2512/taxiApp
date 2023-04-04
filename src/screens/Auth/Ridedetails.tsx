@@ -1,5 +1,5 @@
 import {Image, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {Block, Button, Input, Text} from '../../components';
 import {useTheme} from '../../hooks';
 import MapView, {Callout, Marker} from 'react-native-maps';
@@ -7,7 +7,7 @@ import {useNavigation} from '@react-navigation/native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {useGetRideDetailsMutation} from '../../../Redux/TaxiApi';
 import moment from 'moment';
-import {string} from 'yup';
+import {PROVIDER_GOOGLE} from 'expo';
 
 const Ridedetails = ({route}) => {
   const {colors, sizes, icons} = useTheme();
@@ -22,6 +22,8 @@ const Ridedetails = ({route}) => {
   const [rideDetails, {data, error}] = useGetRideDetailsMutation();
   // console.log('rideId', rideId);
   const lat = data?.endGeoLocation;
+  const mapRef = useRef(MapView);
+
   // console.log('Details', lat);
   // console.log('error', error);
   // var start = JSON.stringify(data?.startGeoLocation)
@@ -107,6 +109,8 @@ const Ridedetails = ({route}) => {
         {startedlat && startedlong ? (
           <MapView
             style={{height: 500}}
+            provider={PROVIDER_GOOGLE}
+            ref={mapRef}
             initialRegion={{
               latitude: startedlat,
               longitude: startedlong,

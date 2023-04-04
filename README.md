@@ -5,6 +5,13 @@ npx expo start --tunnel
 
 node version compatible : 16.17.1
 
+<!-- Sentry.io -->
+
+Accocunt Credentails
+
+email : fobacas122@duiter.com
+password: ytrewq1234
+
 <!-- Commented code of Background Service  Home.tsx-->
 
   <!-- BackgroundFetch.registerTaskAsync(

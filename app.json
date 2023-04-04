@@ -23,9 +23,7 @@
         }
       ]
     ],
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -33,6 +31,9 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/applogo.png",
         "backgroundColor": "#fff"
+      },
+      "config": {
+        "googleMaps": {"apiKey": "AIzaSyD0wWsbdEYBk0V_lI_MZV-loqLrVMPpIb4"}
       },
       "package": "com.taxi",
       "permissions": [
