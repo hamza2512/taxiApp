@@ -21,7 +21,8 @@
         {
           "cameraPermission": "Allow Taxi Recording App to access your camera."
         }
-      ]
+      ],
+      "sentry-expo"
     ],
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -33,7 +34,9 @@
         "backgroundColor": "#fff"
       },
       "config": {
-        "googleMaps": {"apiKey": "AIzaSyD0wWsbdEYBk0V_lI_MZV-loqLrVMPpIb4"}
+        "googleMaps": {
+          "apiKey": "AIzaSyD0wWsbdEYBk0V_lI_MZV-loqLrVMPpIb4"
+        }
       },
       "package": "com.taxi",
       "permissions": [
@@ -48,6 +51,17 @@
       "eas": {
         "projectId": "9c9cf3e0-0b48-4205-807f-a905ae17e8d1"
       }
+    },
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "sentry-expo/upload-sourcemaps",
+          "config": {
+            "organization": "Buildout",
+            "project": "react-native"
+          }
+        }
+      ]
     }
   }
 }

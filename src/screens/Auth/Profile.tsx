@@ -8,12 +8,16 @@ import {useSelector, useDispatch} from 'react-redux';
 import {RootState} from '../../../Redux/Store';
 import {storeData} from '../../AsyncStorage';
 import {setDriverPreference, setUSerData} from '../../../Redux/CounterSlice';
+
 const Profile = ({navigation}) => {
   const dispatch = useDispatch();
   const deriverData = useSelector((state: RootState) => state.data.userData);
   const [userData, setUserData] = useState(deriverData);
   const {sizes, colors, icons} = useTheme();
   const [color, setColor] = useState();
+  const [videoLength, setVideoLength] = useState();
+  const [numberOfVideo, setNumberOfVideo] = useState();
+
   const Gender = ['Male', 'Female', 'Other'];
   const isEnabled = useSelector(
     (state: RootState) => state.data?.driveWithVedio,
@@ -147,6 +151,39 @@ const Profile = ({navigation}) => {
             />
           </View>
         </Block>
+        {isEnabled ? (
+          <>
+            <Block marginTop={sizes.sm} flex={0}>
+              <Input
+                value={videoLength}
+                onChangeText={(val) => {
+                  setVideoLength(val);
+                }}
+                placeholder="Length of single Video chunk"
+                keyboardType="number-pad"
+                style={{
+                  backgroundColor: colors.lightwhite,
+                  borderRadius: 5,
+                  height: 50,
+                }}
+              />
+            </Block>
+            <Block marginTop={sizes.sm} flex={0}>
+              <Input
+                value={numberOfVideo}
+                onChangeText={(val) => {
+                  setNumberOfVideo(val);
+                }}
+                placeholder="Videos to be Uploaded"
+                style={{
+                  backgroundColor: colors.lightwhite,
+                  borderRadius: 5,
+                  height: 50,
+                }}
+              />
+            </Block>
+          </>
+        ) : null}
         {/* <Block marginTop={sizes.sm} flex={0}>
           <Input
             placeholder="Adress"
