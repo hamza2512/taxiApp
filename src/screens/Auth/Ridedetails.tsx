@@ -1,17 +1,22 @@
-import {Image, View} from 'react-native';
-import React, {useEffect, useState, useRef} from 'react';
+import {ActivityIndicator, Image, View} from 'react-native';
+import React, {useEffect, useState, useRef, useLayoutEffect} from 'react';
 import {Block, Button, Input, Text} from '../../components';
 import {useTheme} from '../../hooks';
 import MapView, {Callout, Marker} from 'react-native-maps';
 import {useNavigation} from '@react-navigation/native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
-import {useGetRideDetailsMutation} from '../../../Redux/TaxiApi';
+import {
+  useGetRideDetailsMutation,
+  useGetRideVideoMutation,
+  useRequestVideoMutation,
+} from '../../../Redux/TaxiApi';
 import moment from 'moment';
 import {PROVIDER_GOOGLE} from 'expo';
 
 const Ridedetails = ({route}) => {
   const {colors, sizes, icons} = useTheme();
   const navigation = useNavigation();
+  const [btnText, setBtnText] = useState<string>('Request Recording');
   const [startedlat, setStartedlat] = useState();
   const [startedlong, setStartedlong] = useState();
   const [endedlat, setEndedlat] = useState();
@@ -19,31 +24,31 @@ const Ridedetails = ({route}) => {
   const [regionState, setRegionState] = useState();
   const {rideId} = route.params;
   const [startGeoLocation, setstartGeolocation] = useState({});
+
+  // Api's Mutations
   const [rideDetails, {data, error}] = useGetRideDetailsMutation();
+  const [videoStatus, {data: status, error: statusError, isLoading}] =
+    useRequestVideoMutation();
+  const [
+    fetchVideo,
+    {data: getVideo, error: videoError, isLoading: videoLoading},
+  ] = useGetRideVideoMutation();
+
+  ///////
   // console.log('rideId', rideId);
   const lat = data?.endGeoLocation;
   const mapRef = useRef(MapView);
 
-  // console.log('Details', lat);
-  // console.log('error', error);
-  // var start = JSON.stringify(data?.startGeoLocation)
-  // var ans = JSON.parse(start?.replace("lat",'"lat"').replace("long",'"long"'))
-  // console.log(JSON.parse(data));
-  // var start = data?.startGeoLocation.splice(3,10)
-  // console.log(data?.startGeoLocation);
   const parseLocation = (location: string) => {
     return JSON.parse(
       location?.replace('lat', '"lat"').replace('long', '"long"'),
     );
   };
-  // console.log('Type of Data', typeof data);
+
   let res = {};
   for (const key in data) {
     res[key] = data[key];
   }
-  // console.log('============Res========================');
-  // console.log(res);
-  // console.log('====================================');
   var startLat = +data?.startGeoLocation
     ?.replace(/\"/g, '')
     ?.replace(/{/g, '')
@@ -69,10 +74,26 @@ const Ridedetails = ({route}) => {
     ?.replace(/,/g, ':')
     ?.split(':')[3];
 
-  // console.log(startLat, ' ', startLong);
-  // console.log(typeof startLat, ' ', typeof startLong);
-  // console.log(endLat, ' ', endLong);
-  // console.log(typeof endLat, ' ', typeof endLong);
+  useEffect(() => {
+    if (getVideo) {
+      // console.log('=============Get Video=======================');
+      // console.log('Ride details', data);
+      // console.log('====================================');
+      setBtnText('Play Recording');
+    }
+  }, [videoLoading]);
+
+  const handleButtonPress = () => {
+    if (btnText === 'Request Recording') {
+      setBtnText('Merge in Progress');
+      fetchVideo(rideId);
+    } else if (btnText === 'Play Recording') {
+      navigation.navigate('Video', {url: data?.videoLinks});
+    }
+    // else if (btnText === 'Merge in Progress') {
+    //   setBtnText('Play Recording');
+    // }
+  };
   useEffect(() => {
     if (!startLong || !startLat || !endLat || !endLong) return;
     setStartedlong(startLong);
@@ -83,6 +104,7 @@ const Ridedetails = ({route}) => {
 
   useEffect(() => {
     rideDetails(rideId);
+    videoStatus(rideId);
   }, [rideId]);
 
   return (
@@ -105,97 +127,108 @@ const Ridedetails = ({route}) => {
           <Text h4>Ride Details</Text>
         </Block>
       </Block>
-      <Block flex={0.7}>
-        {startedlat && startedlong ? (
-          <MapView
-            style={{height: 500}}
-            provider={PROVIDER_GOOGLE}
-            ref={mapRef}
-            initialRegion={{
-              latitude: startedlat,
-              longitude: startedlong,
-              // latitude: 37.78825,
-              // longitude: -122.4324,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
-            }}
-            region={regionState}
-            onRegionChangeComplete={(res) => {
-              // console.log('region coordinates', res);
-              setRegionState(res);
+      {isLoading ? (
+        <ActivityIndicator
+          size={'large'}
+          animating={isLoading}
+          color={colors.lightgreen}
+        />
+      ) : (
+        <>
+          <Block flex={0.7}>
+            {startedlat && startedlong ? (
+              <MapView
+                style={{height: 500}}
+                provider={PROVIDER_GOOGLE}
+                ref={mapRef}
+                initialRegion={{
+                  latitude: startedlat,
+                  longitude: startedlong,
+                  // latitude: 37.78825,
+                  // longitude: -122.4324,
+                  latitudeDelta: 0.0922,
+                  longitudeDelta: 0.0421,
+                }}
+                region={regionState}
+                onRegionChangeComplete={(res) => {
+                  // console.log('region coordinates', res);
+                  setRegionState(res);
+                }}>
+                <Marker
+                  coordinate={{latitude: startedlat, longitude: startedlong}}
+                  pinColor={'red'}>
+                  <Callout>
+                    <Text>Starting point</Text>
+                  </Callout>
+                </Marker>
+                <Marker
+                  coordinate={{latitude: endedlat, longitude: endedlong}}
+                  pinColor={'blue'}>
+                  <Callout>
+                    <Text>Ending point</Text>
+                  </Callout>
+                </Marker>
+              </MapView>
+            ) : null}
+          </Block>
+          <Block
+            height={250}
+            width={'100%'}
+            color={colors.white}
+            position="absolute"
+            bottom={0}
+            style={{
+              zIndex: 2,
+              borderTopLeftRadius: 25,
+              borderTopRightRadius: 25,
             }}>
-            <Marker
-              coordinate={{latitude: startedlat, longitude: startedlong}}
-              pinColor={'red'}>
-              <Callout>
-                <Text>Starting point</Text>
-              </Callout>
-            </Marker>
-            <Marker
-              coordinate={{latitude: endedlat, longitude: endedlong}}
-              pinColor={'blue'}>
-              <Callout>
-                <Text>Ending point</Text>
-              </Callout>
-            </Marker>
-          </MapView>
-        ) : null}
-      </Block>
-      <Block
-        height={250}
-        width={'100%'}
-        color={colors.white}
-        position="absolute"
-        bottom={0}
-        style={{zIndex: 2, borderTopLeftRadius: 25, borderTopRightRadius: 25}}>
-        <Block row paddingLeft={20} paddingTop={10} flex={0.2}>
-          <Image source={icons.red} />
-          <Block paddingLeft={10}>
-            <Text p bold>
-              Ride Start At
-            </Text>
-            <Text>
-              {moment(data?.rideStarted).format('DD MMMM YYYY')}{' '}
-              {moment(data?.rideStarted).format('HH:MM:SS')}
-            </Text>
+            <Block row paddingLeft={20} paddingTop={10} flex={0.2}>
+              <Image source={icons.red} />
+              <Block paddingLeft={10}>
+                <Text p bold>
+                  Ride Start At
+                </Text>
+                <Text>
+                  {moment(data?.rideStarted).format('DD MMMM YYYY')}{' '}
+                  {moment(data?.rideStarted).format('HH:MM:SS')}
+                </Text>
+              </Block>
+            </Block>
+            <Block row paddingLeft={20} paddingTop={10} flex={0.2}>
+              <Image style={{marginTop: 5}} source={icons.blue} />
+              <Block paddingLeft={10}>
+                <Text p bold>
+                  Ride Ends At
+                </Text>
+                <Text>
+                  {moment(data?.rideEnded).format('DD MMMM YYYY')}{' '}
+                  {moment(data?.rideEnded).format('HH:MM:SS')}
+                </Text>
+              </Block>
+            </Block>
+            <Block row paddingLeft={20} paddingTop={10} flex={0.2}>
+              <Image style={{marginTop: 8}} source={icons.timer} />
+              <Block paddingLeft={10}>
+                <Text p bold>
+                  Recording Duration
+                </Text>
+                <Text>{data?.duration}</Text>
+              </Block>
+            </Block>
+            <Block flex={0.4}>
+              <Button
+                height={50}
+                width={'50%'}
+                style={{alignSelf: 'center'}}
+                marginTop={20}
+                color={colors.lightgreen}
+                onPress={handleButtonPress}>
+                <Text color={colors.white}>{btnText}</Text>
+              </Button>
+            </Block>
           </Block>
-        </Block>
-        <Block row paddingLeft={20} paddingTop={10} flex={0.2}>
-          <Image style={{marginTop: 5}} source={icons.blue} />
-          <Block paddingLeft={10}>
-            <Text p bold>
-              Ride Ends At
-            </Text>
-            <Text>
-              {moment(data?.rideEnded).format('DD MMMM YYYY')}{' '}
-              {moment(data?.rideEnded).format('HH:MM:SS')}
-            </Text>
-          </Block>
-        </Block>
-        <Block row paddingLeft={20} paddingTop={10} flex={0.2}>
-          <Image style={{marginTop: 8}} source={icons.timer} />
-          <Block paddingLeft={10}>
-            <Text p bold>
-              Recording Duration
-            </Text>
-            <Text>{data?.duration}</Text>
-          </Block>
-        </Block>
-        <Block flex={0.4}>
-          <Button
-            height={50}
-            width={'50%'}
-            style={{alignSelf: 'center'}}
-            marginTop={20}
-            color={colors.lightgreen}
-            // onPress={() => {
-            //   navigation.navigate('Video', {url: data?.videoLinks});
-            // }}
-          >
-            <Text color={colors.white}>Play Recording</Text>
-          </Button>
-        </Block>
-      </Block>
+        </>
+      )}
     </Block>
   );
 };

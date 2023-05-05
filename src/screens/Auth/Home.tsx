@@ -42,7 +42,8 @@ import * as TaskManager from 'expo-task-manager';
 import * as FileSystem from 'expo-file-system';
 import {Audio} from 'expo-av';
 import {useIsFocused} from '@react-navigation/native';
-import * as Sentry from 'sentry-expo';
+// import * as Sentry from 'sentry-expo';
+import * as Sentry from '@sentry/react-native';
 
 const Home = () => {
   const userData = useSelector((state: RootState) => state.data.userData);
@@ -58,13 +59,16 @@ const Home = () => {
   const [count, setCount] = useState(0);
 
   //Sentry Testing
-  try {
-    // your code
-    console.log(Hello);
-  } catch (error) {
-    console.log('Testing ', error);
-    Sentry.Native.captureException(error);
-  }
+  // try {
+  //   // your code
+
+  //   console.log(Hello);
+  // } catch (error) {
+  //   console.log('Testing ', error);
+  //   // Sentry.Native.captureException(error);
+  // }
+  // throw new Error('My first Sentry error22!');
+
   const isRecordingAllowed = useSelector(
     (state: RootState) => state.data.driveWithVedio,
   );
@@ -390,7 +394,12 @@ const Home = () => {
             </TouchableOpacity>
           </Block>
         </Block>
-        <Block padding={20} flex={0.57} marginTop={20} radius={sizes.l}>
+        <Block
+          padding={20}
+          marginHorizontal={'5%'}
+          flex={0.57}
+          marginTop={20}
+          radius={sizes.l}>
           <TouchableOpacity onPress={handlePress}>
             <Image source={visible ? icons.stop : icons.play} />
           </TouchableOpacity>
@@ -427,6 +436,3 @@ const Home = () => {
 };
 
 export default Home;
-// "eas": {
-//   "projectId": "2528fdb7-dfed-49ca-8043-c8b96ebc1990"
-// }

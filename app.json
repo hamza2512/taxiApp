@@ -22,7 +22,14 @@
           "cameraPermission": "Allow Taxi Recording App to access your camera."
         }
       ],
-      "sentry-expo"
+      [
+        "@config-plugins/react-native-ble-plx",
+        {
+          "isBackgroundEnabled": true,
+          "modes": ["peripheral", "central"],
+          "bluetoothAlwaysPermission": "Allow Taxi Recording App to connect to bluetooth devices"
+        }
+      ]
     ],
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -41,7 +48,10 @@
       "package": "com.taxi",
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_CONNECT"
       ]
     },
     "web": {
@@ -51,17 +61,6 @@
       "eas": {
         "projectId": "9c9cf3e0-0b48-4205-807f-a905ae17e8d1"
       }
-    },
-    "hooks": {
-      "postPublish": [
-        {
-          "file": "sentry-expo/upload-sourcemaps",
-          "config": {
-            "organization": "Buildout",
-            "project": "react-native"
-          }
-        }
-      ]
     }
   }
 }

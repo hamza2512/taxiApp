@@ -2,6 +2,8 @@ import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
 
 //todo. code management
 const code = 'rSCx9rjDpZUHn9uhwVSBwvgiJfm9iq9QGVSH7lkEGoD0AzFuIT6UYQ==';
+const videoRequestCode =
+  'UveO_qjqlHd-8H-P7VPMIvzhTAataDetSywxsM08dp5hAzFuaSnn7A==';
 const endcode = 'Ng6qZmBRCUa6woMonddV5SIQu-3Y8C0odTaye7IBIW_vAzFuYYfHeA==';
 const historycode = 'n3EE-WgHmbuDMaSqWW6od96ALPPtjNxNfV1GCQUswQIfAzFueYrsLw==';
 const DriverId = '04bb0098-2ce6-41d2-a7b7-e33fbef7f1ac';
@@ -97,6 +99,38 @@ export const TaxiApi = createApi({
         }
       },
     }),
+    RequestVideo: builder.mutation({
+      query: (rideId: any) => {
+        try {
+          console.log('called +++++========');
+
+          return {
+            url: `/RequestVideoMerging?code=${videoRequestCode}&rideId=${rideId}`,
+            method: 'GET',
+            responseHandler: (response) => response.text(),
+          };
+        } catch (error) {
+          console.log('error when fetching', error);
+          return {data: error};
+        }
+      },
+    }),
+    GetRideVideo: builder.mutation({
+      query: (rideId: any) => {
+        try {
+          console.log('called +++++========');
+
+          return {
+            url: `/RequestVideoMerging?code=${code}&rideId=${rideId}`,
+            method: 'GET',
+            responseHandler: (response) => response.text(),
+          };
+        } catch (error) {
+          console.log('error when fetching', error);
+          return {data: error};
+        }
+      },
+    }),
   }),
 });
 // SendRideVideos
@@ -109,4 +143,6 @@ export const {
   useGetRideDetailsMutation,
   useSendRideVideosMutation,
   useGetActiveRideMutation,
+  useRequestVideoMutation,
+  useGetRideVideoMutation,
 } = TaxiApi;

@@ -8,6 +8,8 @@ import {useSelector, useDispatch} from 'react-redux';
 import {RootState} from '../../../Redux/Store';
 import {storeData} from '../../AsyncStorage';
 import {setDriverPreference, setUSerData} from '../../../Redux/CounterSlice';
+import useBLE from '../../Services/useBLE';
+import DeviceModal from '../../components/DeviceConnectionModal';
 
 const Profile = ({navigation}) => {
   const dispatch = useDispatch();
@@ -17,6 +19,39 @@ const Profile = ({navigation}) => {
   const [color, setColor] = useState();
   const [videoLength, setVideoLength] = useState();
   const [numberOfVideo, setNumberOfVideo] = useState();
+
+  //Bluetooth Configurations
+  const {
+    requestPermissions,
+    scanForPeripherals,
+    allDevices,
+    connectToDevice,
+    connectedDevice,
+    // heartRate,
+    // disconnectFromDevice,
+  } = useBLE();
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+
+  const hideModal = () => {
+    setIsModalVisible(false);
+  };
+  const openModal = () => {
+    scanForDevices();
+    setIsModalVisible(true);
+  };
+  const scanForDevices = async () => {
+    const isPermissionsEnabled = await requestPermissions();
+    if (isPermissionsEnabled) {
+      const res = scanForPeripherals();
+      console.log('RESPONSE ==', res);
+
+      if (res === false) {
+        console.log('==========INSIDE BLE OFF==========================');
+        hideModal();
+      }
+    }
+    console.log(isPermissionsEnabled);
+  };
 
   const Gender = ['Male', 'Female', 'Other'];
   const isEnabled = useSelector(
@@ -235,7 +270,21 @@ const Profile = ({navigation}) => {
           height={50}>
           <Text color={colors.white}>Update</Text>
         </Button>
+
+        <Button
+          onPress={openModal}
+          color={colors.lightgreen}
+          marginTop={sizes.md}
+          height={50}>
+          <Text color={colors.white}>OPen Modal</Text>
+        </Button>
       </Block>
+      <DeviceModal
+        closeModal={hideModal}
+        visible={isModalVisible}
+        connectToPeripheral={connectToDevice}
+        devices={allDevices}
+      />
     </Block>
   );
 };
