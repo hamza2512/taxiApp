@@ -158,6 +158,8 @@ const Home = () => {
     let loc = await Location.getCurrentPositionAsync({});
     // console.log('location', loc);
     setLocation(loc);
+
+    return loc.coords;
   };
   useLayoutEffect(() => {
     driverLocation();
@@ -171,8 +173,8 @@ const Home = () => {
   }, [visible]);
 
   const startlocation = useCallback(() => {
-    // console.log('location logging');
-    // console.log(location);
+    console.log('location logging');
+    console.log(location);
 
     createRide({
       driverID: userData?.driverID,
@@ -202,14 +204,31 @@ const Home = () => {
     // console.log('Inside of EndLocation function ');
     if (rideId) {
       // console.log('Inside of EndLocation function if condition');
-      const data = {
-        location: location?.coords,
-        rideId: rideId,
-      };
-      EndRide({data}).then((res) => {
-        setRideEndData(res);
-        // console.log('End Ride Response', res);
+      // const data = {
+      //   location: location?.coords,
+      //   rideId: rideId,
+      // };
+      let data;
+      driverLocation().then((val) => {
+        console.log(')))))))))', val);
+        data = {
+          location: val,
+          rideId: rideId,
+        };
+
+        EndRide({data}).then((res) => {
+          setRideEndData(res);
+          console.log('End Ride Response', res);
+        });
       });
+      // console.log('===============EnD Ride=====================');
+      // console.log(data);
+      // console.log(rideId);
+      // console.log('====================================');
+      // EndRide({data}).then((res) => {
+      //   setRideEndData(res);
+      //   // console.log('End Ride Response', res);
+      // });
     }
   };
 
@@ -408,9 +427,9 @@ const Home = () => {
               flex={0}
               position={'absolute'}
               bottom={-65}
-              width={'70%'}
+              width={'80%'}
               height={80}
-              right={'25%'}
+              right={'15%'}
               style={{
                 zIndex: 1,
                 alignSelf: 'center',

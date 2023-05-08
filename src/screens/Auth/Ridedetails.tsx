@@ -82,7 +82,14 @@ const Ridedetails = ({route}) => {
       setBtnText('Play Recording');
     }
   }, [videoLoading]);
-
+  console.log('================Start LAng Long====================');
+  console.log(startLat);
+  console.log(startLong);
+  console.log('====================================');
+  console.log('================End LAng Long====================');
+  console.log(endLat);
+  console.log(endLong);
+  console.log('====================================');
   const handleButtonPress = () => {
     if (btnText === 'Request Recording') {
       setBtnText('Merge in Progress');
