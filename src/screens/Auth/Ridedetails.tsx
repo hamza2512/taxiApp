@@ -44,7 +44,12 @@ const Ridedetails = ({route}) => {
       location?.replace('lat', '"lat"').replace('long', '"long"'),
     );
   };
-
+  useLayoutEffect(() => {
+    rideDetails(rideId);
+  }, []);
+  console.log('====================================');
+  console.log(data);
+  console.log('====================================');
   let res = {};
   for (const key in data) {
     res[key] = data[key];
@@ -75,32 +80,46 @@ const Ridedetails = ({route}) => {
     ?.split(':')[3];
 
   useEffect(() => {
-    if (getVideo) {
-      // console.log('=============Get Video=======================');
-      // console.log('Ride details', data);
-      // console.log('====================================');
-      setBtnText('Play Recording');
+    const stat = data?.rideStatus;
+
+    switch (stat) {
+      case 'NotRequested':
+        setBtnText('Request Recording');
+        break;
+      case 'VideoMergeInProgress':
+        // code block
+        setBtnText('Merging in Progress');
+        break;
+      case 'MergeComplete':
+        // code block
+        setBtnText('Get Recording');
+        break;
+      default:
+        setBtnText('Request Video');
+        break;
     }
-  }, [videoLoading]);
-  console.log('================Start LAng Long====================');
-  console.log(startLat);
-  console.log(startLong);
-  console.log('====================================');
-  console.log('================End LAng Long====================');
-  console.log(endLat);
-  console.log(endLong);
-  console.log('====================================');
+    // if (data?.rideStatus === 'VideoMergeInProgress') {
+    // console.log('=============Get Video=======================');
+    // console.log('Ride details', data);
+    // console.log('====================================');
+    //   setBtnText('Play Recording');
+    // }
+  }, [data]);
+
   const handleButtonPress = () => {
     if (btnText === 'Request Recording') {
-      setBtnText('Merge in Progress');
-      fetchVideo(rideId);
+      // setBtnText('Merging in Progress');
+      videoStatus(rideId).then(() => setBtnText('Merging in Progress')); //Request for Videos
+    } else if (btnText === 'Get Recording') {
+      fetchVideo(rideId).then(() => setBtnText('Play Recording')); //Get the Videos
     } else if (btnText === 'Play Recording') {
-      navigation.navigate('Video', {url: data?.videoLinks});
+      navigation.navigate('Video', {url: getVideo});
     }
     // else if (btnText === 'Merge in Progress') {
     //   setBtnText('Play Recording');
     // }
   };
+
   useEffect(() => {
     if (!startLong || !startLat || !endLat || !endLong) return;
     setStartedlong(startLong);
@@ -108,11 +127,6 @@ const Ridedetails = ({route}) => {
     setEndedlat(endLat);
     setEndedlong(endLong);
   }, [startLat, startLong, endLat, endLong]);
-
-  useEffect(() => {
-    rideDetails(rideId);
-    videoStatus(rideId);
-  }, [rideId]);
 
   return (
     <Block safe flex={1}>
@@ -229,6 +243,7 @@ const Ridedetails = ({route}) => {
                 style={{alignSelf: 'center'}}
                 marginTop={20}
                 color={colors.lightgreen}
+                disabled={btnText === 'Merging in Progress' ? true : false}
                 onPress={handleButtonPress}>
                 <Text color={colors.white}>{btnText}</Text>
               </Button>

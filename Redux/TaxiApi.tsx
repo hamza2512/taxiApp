@@ -121,7 +121,7 @@ export const TaxiApi = createApi({
           console.log('called +++++========');
 
           return {
-            url: `/RequestVideoMerging?code=${code}&rideId=${rideId}`,
+            url: `/GetVideosForRide?code=${code}&rideId=${rideId}`,
             method: 'GET',
             responseHandler: (response) => response.text(),
           };

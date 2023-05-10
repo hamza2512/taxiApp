@@ -4438,7 +4438,7 @@ expo-background-fetch@~11.1.1:
   dependencies:
     expo-task-manager "~11.1.0"
 
-expo-camera@~13.2.1:
+expo-camera@^13.2.1:
   version "13.2.1"
   resolved "https://registry.yarnpkg.com/expo-camera/-/expo-camera-13.2.1.tgz#bfd1e2248d10a5da43d43a4cc77e378e5acf25bb"
   integrity sha512-fZdRyF402jJGGmLVlumrLcr5Em9+Y2SO1MIlxLBtHXnybyHbTRMRAbzVapKX1Aryfujqadh+Kl+sdsWYkMuJjg==
