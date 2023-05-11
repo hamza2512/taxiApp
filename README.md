@@ -5,6 +5,8 @@ npx expo start --tunnel
 
 node version compatible : 16.17.1
 
+<!-- eas build -p android --profile preview -->
+
 // "eas": {
 // "projectId": "2528fdb7-dfed-49ca-8043-c8b96ebc1990"
 // }

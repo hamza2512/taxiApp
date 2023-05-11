@@ -141,8 +141,6 @@ const Home = () => {
   }, [isActive]);
 
   const driverLocation = async () => {
-    // console.log('=================INSIDE location===================');
-
     let {status} = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       // setErrorMsg('Permission to access location was denied');
@@ -155,8 +153,10 @@ const Home = () => {
 
     // console.log('=================INSIDE location===================', status);
 
-    let loc = await Location.getCurrentPositionAsync({});
-    // console.log('location', loc);
+    let loc = await Location.getCurrentPositionAsync({
+      accuracy: 4,
+    });
+    console.log('location=-----------------', loc);
     setLocation(loc);
 
     return loc.coords;
@@ -172,32 +172,38 @@ const Home = () => {
     }
   }, [visible]);
 
-  const startlocation = useCallback(() => {
-    console.log('location logging');
-    console.log(location);
+  const startlocation = useCallback(
+    (val) => {
+      console.log('location logging');
+      console.log('----', val?.latitude);
 
-    createRide({
-      driverID: userData?.driverID,
-      latitude: location?.coords?.latitude,
-      longitude: location?.coords?.longitude,
-    }).then((item) => {
-      reference.current = true;
-      setRideId(item?.data?.rideId);
-      setDeviceId(item?.data?.deviceId);
-      // deviceId = item?.data?.deviceId;
-      taskId = item?.data?.rideId;
+      createRide({
+        driverID: userData?.driverID,
+        latitude: val?.latitude,
+        longitude: val?.longitude,
+      }).then((item) => {
+        reference.current = true;
+        setRideId(item?.data?.rideId);
+        setDeviceId(item?.data?.deviceId);
+        // deviceId = item?.data?.deviceId;
+        taskId = item?.data?.rideId;
 
-      dispatch(setRecordingStart(true));
-    });
-  }, [location]);
+        dispatch(setRecordingStart(true));
+      });
+      // setLocation(null);
+    },
+    [location],
+  );
 
   useEffect(() => {
     if (!visible) return;
-    if (!location) {
-      driverLocation().then(() => startlocation());
-    } else {
-      startlocation();
-    }
+    driverLocation().then((val) => startlocation(val));
+    // if (!location) {
+    //   driverLocation().then((val) => startlocation());
+    // } else {
+    //   console.log('----===+++');
+    //   startlocation();
+    // }
   }, [visible]);
 
   const endlocation = () => {
@@ -210,7 +216,6 @@ const Home = () => {
       // };
       let data;
       driverLocation().then((val) => {
-        console.log(')))))))))', val);
         data = {
           location: val,
           rideId: rideId,
@@ -220,6 +225,7 @@ const Home = () => {
           setRideEndData(res);
           console.log('End Ride Response', res);
         });
+        // setLocation(null);
       });
       // console.log('===============EnD Ride=====================');
       // console.log(data);

@@ -37,11 +37,11 @@ function App() {
   // "transformIgnorePatterns": [
   //   "node_modules/(?!(jest-)?react-native|react-clone-referenced-element|@react-native-community|expo(nent)?|@expo(nent)?/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|@sentry/.*)"
   // ]
-  // Sentry.init({
-  //   dsn: 'https://2474b003c1b1486c87d550a3678a091b@o4504988646244352.ingest.sentry.io/4504988651618304',
-  //   tracesSampleRate: 1.0,
-  //   enableNative: false,
-  // });
+  Sentry.init({
+    dsn: 'https://2474b003c1b1486c87d550a3678a091b@o4504988646244352.ingest.sentry.io/4504988651618304',
+    tracesSampleRate: 1.0,
+    enableNative: false,
+  });
   useEffect(() => {
     VersionCheck.needUpdate({
       depth: 2,
@@ -70,5 +70,5 @@ function App() {
 
 // export default Sentry.Native.wrap(App);
 // export default Sentry.wrap(App);
-export default App;
-// export default Sentry.wrap(App);
+// export default App;
+export default Sentry.wrap(App);
