@@ -18,7 +18,7 @@
     "@react-navigation/native": "^6.0.8",
     "@react-navigation/stack": "^6.1.1",
     "@reduxjs/toolkit": "^1.8.5",
-    "@sentry/react-native": "4.13.0",
+    "@sentry/react-native": "^5.4.2",
     "dayjs": "^1.10.5",
     "expo": "~48.0.10",
     "expo-app-loading": "~2.0.0",

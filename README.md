@@ -15,8 +15,8 @@ node version compatible : 16.17.1
 
 Accocunt Credentails
 
-email : fobacas122@duiter.com
-password: ytrewq1234
+email : viyed65244@glumark.com
+password: viyed65244@glumark.com
 
 <!-- Commented code of Background Service  Home.tsx-->
 

@@ -42,7 +42,6 @@ import * as TaskManager from 'expo-task-manager';
 import * as FileSystem from 'expo-file-system';
 import {Audio} from 'expo-av';
 import {useIsFocused} from '@react-navigation/native';
-// import * as Sentry from 'sentry-expo';
 import * as Sentry from '@sentry/react-native';
 
 const Home = () => {
@@ -59,15 +58,9 @@ const Home = () => {
   const [count, setCount] = useState(0);
 
   //Sentry Testing
-  // try {
-  //   // your code
 
-  //   console.log(Hello);
-  // } catch (error) {
-  //   console.log('Testing ', error);
-  //   // Sentry.Native.captureException(error);
-  // }
-  // throw new Error('My first Sentry error22!');
+  // Sentry.captureException(new Error('My first Sentry error23333332!'));
+  // throw new Error('My first Sentry  very long waited error22!');
 
   const isRecordingAllowed = useSelector(
     (state: RootState) => state.data.driveWithVedio,
