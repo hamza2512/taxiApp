@@ -42,7 +42,8 @@ import * as TaskManager from 'expo-task-manager';
 import * as FileSystem from 'expo-file-system';
 import {Audio} from 'expo-av';
 import {useIsFocused} from '@react-navigation/native';
-import * as Sentry from '@sentry/react-native';
+// import * as Sentry from '@sentry/react-native';
+import NetInfo from '@react-native-community/netinfo';
 
 const Home = () => {
   const userData = useSelector((state: RootState) => state.data.userData);
@@ -56,12 +57,21 @@ const Home = () => {
   const [remainingSecs, setRemainingSecs] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [count, setCount] = useState(0);
+  const [isConnected, setConnected] = useState<any>(true);
 
   //Sentry Testing
 
   // Sentry.captureException(new Error('My first Sentry error23333332!'));
-  // throw new Error('My first Sentry  very long waited error22!');
+  // throw new Error('My first Sentrysdsdds asd0qwwqw very long waited error22!');
 
+  // const unsubscribe = NetInfo.addEventListener((state) => {
+  //   console.log('Connection type', state.type);
+  //   console.log('Is connected?', state.isConnected);
+  //   setConnected(state.isConnected);
+  // });
+
+  // Unsubscribe
+  // unsubscribe();
   const isRecordingAllowed = useSelector(
     (state: RootState) => state.data.driveWithVedio,
   );
@@ -358,12 +368,21 @@ const Home = () => {
 
   const handlePress = () => {
     // toggle()
-    setIsActive(!isActive);
-    setVisible(!visible);
-    setCount((count) => count + 1);
-    if (!recording == false) {
-      dispatch(setRecordingStart(!recording));
-    }
+    NetInfo.fetch().then((state) => {
+      // console.log('Connection type', state.type);
+      // console.log('Is connected?', state.isConnected);
+
+      if (state.isConnected) {
+        setIsActive(!isActive);
+        setVisible(!visible);
+        setCount((count) => count + 1);
+        if (!recording == false) {
+          dispatch(setRecordingStart(!recording));
+        }
+      } else {
+        Alert.alert('Please Connect to the Internet');
+      }
+    });
     // endlocation()
   };
   return (
